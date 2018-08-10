@@ -37,7 +37,7 @@ func Run(conf *config.Config) {
 		eventHandler = new(slack.Slack)
 	case len(conf.Handler.Hipchat.Room) > 0 || len(conf.Handler.Hipchat.Token) > 0:
 		eventHandler = new(hipchat.Hipchat)
-	case len(conf.Handler.Mattermost.Channel) > 0 || len(conf.Handler.Mattermost.Url) > 0:
+	case len(conf.Handler.Mattermost.ChannelId) > 0 || len(conf.Handler.Mattermost.Url) > 0:
 		eventHandler = new(mattermost.Mattermost)
 	case len(conf.Handler.Flock.Url) > 0:
 		eventHandler = new(flock.Flock)

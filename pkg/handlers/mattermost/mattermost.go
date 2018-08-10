@@ -142,7 +142,7 @@ func checkMissingMattermostVars(s *Mattermost) error {
 	return nil
 }
 
-func prepareMattermostMessage(e kbEvent.Event, m *Mattermost) *MattermostMessage {
+func prepareMattermostMessage(e kbEvent.Event, m *Mattermost) *MattermostMessageV4 {
 
 	return &MattermostMessageV4{
 		ChannelId:  m.ChannelId,
@@ -150,7 +150,7 @@ func prepareMattermostMessage(e kbEvent.Event, m *Mattermost) *MattermostMessage
 	}
 }
 
-func postMessage(url, token string, mattermostMessage *MattermostMessage) error {
+func postMessage(url, token string, mattermostMessage *MattermostMessageV4) error {
 	message, err := json.Marshal(mattermostMessage)
 	if err != nil {
 		return err
