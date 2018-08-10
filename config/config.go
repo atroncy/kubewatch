@@ -76,9 +76,9 @@ type Hipchat struct {
 
 // Mattermost contains mattermost configuration
 type Mattermost struct {
-	Channel  string `json:"room"`
+	ChannelId  string `json:"channel_id"`
 	Url      string `json:"url"`
-	Username string `json:"username"`
+	Token string `json:"token"`
 }
 
 // Flock contains flock configuration

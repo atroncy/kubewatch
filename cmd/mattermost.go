@@ -33,10 +33,10 @@ var mattermostConfigCmd = &cobra.Command{
 			logrus.Fatal(err)
 		}
 
-		channel, err := cmd.Flags().GetString("channel")
+		channel, err := cmd.Flags().GetString("channel-id")
 		if err == nil {
 			if len(channel) > 0 {
-				conf.Handler.Mattermost.Channel = channel
+				conf.Handler.Mattermost.ChannelId = channel
 			}
 		} else {
 			logrus.Fatal(err)
@@ -51,10 +51,10 @@ var mattermostConfigCmd = &cobra.Command{
 			logrus.Fatal(err)
 		}
 
-		username, err := cmd.Flags().GetString("username")
+		token, err := cmd.Flags().GetString("token")
 		if err == nil {
 			if len(url) > 0 {
-				conf.Handler.Mattermost.Username = username
+				conf.Handler.Mattermost.Token = token
 			}
 		} else {
 			logrus.Fatal(err)
@@ -68,7 +68,7 @@ var mattermostConfigCmd = &cobra.Command{
 }
 
 func init() {
-	mattermostConfigCmd.Flags().StringP("channel", "c", "", "Specify Mattermost channel")
+	mattermostConfigCmd.Flags().StringP("channel-id", "c", "", "Specify Mattermost channel_id")
 	mattermostConfigCmd.Flags().StringP("url", "u", "", "Specify Mattermost url")
-	mattermostConfigCmd.Flags().StringP("username", "n", "", "Specify Mattermost username")
+	mattermostConfigCmd.Flags().StringP("token", "t", "", "Specify Mattermost token")
 }

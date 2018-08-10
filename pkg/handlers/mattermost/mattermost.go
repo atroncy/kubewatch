@@ -42,7 +42,7 @@ var mattermostErrMsg = `
 You need to set Mattermost url, channel and username for Mattermost notify,
 using "--channel/-c", "--url/-u" and "--username/-n", or using environment variables:
 
-export KW_MATTERMOST_CHANNEL=mattermost_channel
+export KW_MATTERMOST_CHANNELID=mattermost_channel
 export KW_MATTERMOST_URL=mattermost_url
 export KW_MATTERMOST_USERNAME=mattermost_username
 
@@ -52,46 +52,58 @@ Command line flags will override environment variables
 
 // Mattermost handler implements handler.Handler interface,
 // Notify event to Mattermost channel
+//type Mattermost struct {
+//	Channel  string
+//	Url      string
+//	Username string
+//}
+
 type Mattermost struct {
-	Channel  string
+	ChannelId  string
 	Url      string
 	Username string
+	Token string
 }
 
-type MattermostMessage struct {
-	Channel      string                         `json:"channel"`
-	Username     string                         `json:"username"`
-	IconUrl      string                         `json:"icon_url"`
-	Text         string                         `json:"text"`
-	Attachements []MattermostMessageAttachement `json:"attachments"`
+type MattermostMessageV4 struct {
+	ChannelId string `json:"channel_id"`
+	Message string `json:"message"`
 }
 
-type MattermostMessageAttachement struct {
-	Title string `json:"title"`
-	Color string `json:"color"`
-}
+//type MattermostMessage struct {
+//	Channel      string                         `json:"channel"`
+//	Username     string                         `json:"username"`
+//	IconUrl      string                         `json:"icon_url"`
+//	Text         string                         `json:"text"`
+//	Attachements []MattermostMessageAttachement `json:"attachments"`
+//}
+
+//type MattermostMessageAttachement struct {
+//	Title string `json:"title"`
+//	Color string `json:"color"`
+//}
 
 // Init prepares Mattermost configuration
 func (m *Mattermost) Init(c *config.Config) error {
-	channel := c.Handler.Mattermost.Channel
+	channelId := c.Handler.Mattermost.ChannelId
 	url := c.Handler.Mattermost.Url
-	username := c.Handler.Mattermost.Username
+	token := c.Handler.Mattermost.Token
 
-	if channel == "" {
-		channel = os.Getenv("KW_MATTERMOST_CHANNEL")
+	if channelId == "" {
+		channelId = os.Getenv("KW_MATTERMOST_CHANNELID")
 	}
 
 	if url == "" {
 		url = os.Getenv("KW_MATTERMOST_URL")
 	}
 
-	if username == "" {
-		username = os.Getenv("KW_MATTERMOST_USERNAME")
+	if token == "" {
+		token = os.Getenv("KW_MATTERMOST_TOKEN")
 	}
 
-	m.Channel = channel
+	m.ChannelId = channelId
 	m.Url = url
-	m.Username = username
+	m.Token = token
 
 	return checkMissingMattermostVars(m)
 }
@@ -113,18 +125,18 @@ func notifyMattermost(m *Mattermost, obj interface{}, action string) {
 
 	mattermostMessage := prepareMattermostMessage(e, m)
 
-	err := postMessage(m.Url, mattermostMessage)
+	err := postMessage(m.Url, m.Token, mattermostMessage)
 	if err != nil {
 		log.Printf("%s\n", err)
 		return
 	}
 
-	log.Printf("Message successfully sent to channel %s at %s", m.Channel, time.Now())
+	log.Printf("Message successfully sent to channel %s at %s", m.ChannelId, time.Now())
 }
 
 func checkMissingMattermostVars(s *Mattermost) error {
-	if s.Channel == "" || s.Url == "" || s.Username == "" {
-		return fmt.Errorf(mattermostErrMsg, "Missing Mattermost channel, url or username")
+	if s.ChannelId == "" || s.Url == "" || s.Token == "" {
+		return fmt.Errorf(mattermostErrMsg, "Missing Mattermost channelId, url or token")
 	}
 
 	return nil
@@ -132,30 +144,24 @@ func checkMissingMattermostVars(s *Mattermost) error {
 
 func prepareMattermostMessage(e kbEvent.Event, m *Mattermost) *MattermostMessage {
 
-	return &MattermostMessage{
-		Channel:  m.Channel,
-		Username: m.Username,
-		IconUrl:  "https://raw.githubusercontent.com/kubernetes/kubernetes/master/logo/logo_with_border.png",
-		Attachements: []MattermostMessageAttachement{
-			{
-				Title: e.Message(),
-				Color: mattermostColors[e.Status],
-			},
-		},
+	return &MattermostMessageV4{
+		ChannelId:  m.ChannelId,
+		Message: e.Message(), // TODO markdown message
 	}
 }
 
-func postMessage(url string, mattermostMessage *MattermostMessage) error {
+func postMessage(url, token string, mattermostMessage *MattermostMessage) error {
 	message, err := json.Marshal(mattermostMessage)
 	if err != nil {
 		return err
 	}
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(message))
+	req, err := http.NewRequest("POST", url + "/api/v4/posts", bytes.NewBuffer(message))
 	if err != nil {
 		return err
 	}
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Authorization", "Bearer " + token)
 
 	client := &http.Client{}
 	_, err = client.Do(req)

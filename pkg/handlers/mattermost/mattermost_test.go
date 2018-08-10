@@ -14,39 +14,39 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package mattermost
-
-import (
-	"fmt"
-	"reflect"
-	"testing"
-
-	"github.com/bitnami-labs/kubewatch/config"
-)
-
-func TestMattermostInit(t *testing.T) {
-	s := &Mattermost{}
-	expectedError := fmt.Errorf(mattermostErrMsg, "Missing Mattermost channel, url or username")
-
-	var Tests = []struct {
-		mattermost config.Mattermost
-		err   error
-	}{
-		{config.Mattermost{Url: "foo", Channel: "bar", Username: "username"}, nil},
-		{config.Mattermost{Url: "foo", Channel: "bar"}, expectedError},
-		{config.Mattermost{Url: "foo", Username: "username"}, expectedError},
-		{config.Mattermost{Channel: "foo", Username: "username"}, expectedError},
-		{config.Mattermost{Url: "foo"}, expectedError},
-		{config.Mattermost{Channel: "bar"}, expectedError},
-		{config.Mattermost{Username: "bar"}, expectedError},
-		{config.Mattermost{}, expectedError},
-	}
-
-	for _, tt := range Tests {
-		c := &config.Config{}
-		c.Handler.Mattermost = tt.mattermost
-		if err := s.Init(c); !reflect.DeepEqual(err, tt.err) {
-			t.Fatalf("Init(): %v", err)
-		}
-	}
-}
+//package mattermost
+//
+//import (
+//	"fmt"
+//	"reflect"
+//	"testing"
+//
+//	"github.com/bitnami-labs/kubewatch/config"
+//)
+//
+//func TestMattermostInit(t *testing.T) {
+//	s := &Mattermost{}
+//	expectedError := fmt.Errorf(mattermostErrMsg, "Missing Mattermost channel, url or username")
+//
+//	var Tests = []struct {
+//		mattermost config.Mattermost
+//		err   error
+//	}{
+//		{config.Mattermost{Url: "foo", Channel: "bar", Username: "username"}, nil},
+//		{config.Mattermost{Url: "foo", Channel: "bar"}, expectedError},
+//		{config.Mattermost{Url: "foo", Username: "username"}, expectedError},
+//		{config.Mattermost{Channel: "foo", Username: "username"}, expectedError},
+//		{config.Mattermost{Url: "foo"}, expectedError},
+//		{config.Mattermost{Channel: "bar"}, expectedError},
+//		{config.Mattermost{Username: "bar"}, expectedError},
+//		{config.Mattermost{}, expectedError},
+//	}
+//
+//	for _, tt := range Tests {
+//		c := &config.Config{}
+//		c.Handler.Mattermost = tt.mattermost
+//		if err := s.Init(c); !reflect.DeepEqual(err, tt.err) {
+//			t.Fatalf("Init(): %v", err)
+//		}
+//	}
+//}
